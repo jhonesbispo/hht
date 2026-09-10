@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apontamento de Efetivo e HHT · EQTL PI</title>
+<style>
+  html,body{margin:0;padding:0;}
+  :root{
+    --navy:#16304F;
+    --navy-dark:#0D1F35;
+    --amber:#E29B3E;
+    --amber-dark:#C77F22;
+    --paper:#F6F4EF;
+    --card:#FFFFFF;
+    --line:#DCD6C8;
+    --ink:#1C2430;
+    --ink-soft:#5B6472;
+    --good:#2F7D5A;
+    --bad:#B4442E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:transparent;}
+  .apw{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    min-height:100%;
+    padding:0;
+  }
+  .apw-shell{max-width:580px;margin:0 auto;padding:28px 20px 60px;}
+
+  .apw-topline{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;gap:12px;}
+  .apw-brand{font-size:13px;letter-spacing:.02em;color:var(--ink-soft);}
+
+  .apw-header h1{font-size:23px;line-height:1.25;margin:0 0 6px;font-weight:700;color:var(--navy-dark);}
+  .apw-header p{margin:0 0 24px;color:var(--ink-soft);font-size:14.5px;line-height:1.5;}
+
+  .apw-progress-label{font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+  .apw-progress-track{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:28px;}
+  .apw-progress-fill{height:100%;background:var(--amber);border-radius:2px;transition:width .35s ease;}
+
+  .apw-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:14px;}
+
+  .apw-field{margin-bottom:18px;}
+  .apw-field:last-child{margin-bottom:0;}
+  .apw-label{display:block;font-size:14px;font-weight:600;color:var(--navy-dark);margin-bottom:7px;}
+  .apw-input,.apw-select{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:7px;
+    font-size:15px;color:var(--ink);background:#fff;font-family:inherit;
+  }
+  .apw-input:focus,.apw-select:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber-dark);}
+
+  .apw-search{position:relative;margin-bottom:12px;}
+  .apw-search input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:7px;font-size:15px;font-family:inherit;}
+  .apw-city-count{font-size:13px;color:var(--ink-soft);margin-bottom:10px;}
+  .apw-city-list{max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:#fff;}
+  .apw-city-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #EFEBE2;cursor:pointer;}
+  .apw-city-row:last-child{border-bottom:none;}
+  .apw-city-row:hover{background:#FBF9F4;}
+  .apw-city-row input{margin-right:10px;width:17px;height:17px;accent-color:var(--navy);flex-shrink:0;}
+  .apw-city-row label{font-size:14.5px;cursor:pointer;flex:1;}
+  .apw-city-empty{padding:20px 12px;color:var(--ink-soft);font-size:14px;text-align:center;}
+
+  .apw-base-card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:9px;padding:18px;margin-bottom:14px;}
+  .apw-base-name{font-size:16px;font-weight:700;color:var(--navy-dark);margin:0 0 4px;}
+  .apw-base-meta{font-size:12px;font-weight:600;color:var(--amber-dark);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+  .apw-base-cities{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 16px;background:#F9F8F5;padding:8px 10px;border-radius:6px;border:1px dashed var(--line);}
+  .apw-base-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:420px){.apw-base-grid{grid-template-columns:1fr;}}
+
+  .apw-rev-group{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px;background:#FAFAFAF8;}
+  .apw-rev-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .apw-rev-title{font-size:15px;font-weight:700;color:var(--navy-dark);}
+  .apw-rev-badges{display:flex;gap:10px;font-size:13px;font-weight:600;color:var(--navy);}
+  .apw-rev-cities{font-size:13px;color:var(--ink-soft);line-height:1.4;margin-top:6px;}
+  .apw-rev-cities span{font-weight:600;color:var(--ink);}
+
+  .apw-actions{display:flex;gap:10px;margin-top:22px;}
+  .apw-btn{
+    flex:1;padding:13px 16px;border-radius:8px;font-size:15px;font-weight:600;
+    border:none;cursor:pointer;font-family:inherit;text-align:center;
+  }
+  .apw-btn-primary{background:var(--navy);color:#fff;}
+  .apw-btn-primary:hover{background:var(--navy-dark);}
+  .apw-btn-primary:disabled{background:#B7BEC8;cursor:not-allowed;}
+  .apw-btn-ghost{background:none;color:var(--navy);border:1px solid var(--line);}
+  .apw-btn-ghost:hover{background:#FBF9F4;}
+
+  .apw-summary-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #EFEBE2;font-size:14.5px;gap:12px;}
+  .apw-summary-row:last-child{border-bottom:none;}
+  .apw-summary-k{color:var(--ink-soft);}
+  .apw-summary-v{font-weight:600;text-align:right;}
+
+  .apw-done{text-align:center;padding:40px 10px 10px;}
+  .apw-done-icon{width:54px;height:54px;border-radius:50%;background:var(--good);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:26px;}
+  .apw-done h2{margin:0 0 8px;font-size:20px;color:var(--navy-dark);}
+  .apw-done p{margin:0 0 24px;color:var(--ink-soft);font-size:14.5px;}
+
+  .apw-error{color:var(--bad);font-size:13px;margin-top:6px;}
+  .apw-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy-dark);color:#fff;padding:10px 18px;border-radius:20px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;}
+  .apw-toast.show{opacity:1;}
+
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea { position: absolute; left: 0; top: 0; width: 100%; border: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="apw" id="apwRoot"></div>
+
+<script>
+(function(){
+  const WEB3FORMS_ACCESS_KEY = "b5ffe3da-5142-4fb0-979d-c48c9b11245c";
+
+  const BASES_DATA = [{"base": "BOM JESUS", "reg": "FLORIANO", "sup": "SUL", "dist": "EQTL PI", "cidades": ["ALVORADA DO GURGUEIA", "AVELINO LOPES", "BARREIRAS DO PIAUI", "BOM JESUS", "COLONIA DO GURGUEIA", "CORRENTE", "CRISTALANDIA DO PIAUI", "CRISTINO CASTRO", "CURIMATA", "CURRAIS", "ELISEU MARTINS", "GILBUES", "JULIO BORGES", "MANOEL EMIDIO", "MONTE ALEGRE DO PIAUI", "MORRO CABECA NO TEMPO", "PALMEIRA DO PIAUI", "PARNAGUA", "REDENCAO DO GURGUEIA", "RIACHO FRIO", "SANTA FILOMENA", "SANTA LUZ", "SAO GONCALO DO GURGUEIA", "SEBASTIAO BARROS"]}, {"base": "CAMPO MAIOR", "reg": "METROPOLITANA", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["ALTO DO LONG\u00c1", "ALTOS (SUB BASE)", "ASSUN\u00c7\u00c3O DO PIAU\u00cd", "BEM BOM", "BENEDITINOS", "BOQUEIR\u00c3O DO PIAU\u00cd", "BURITI DOS MONTES", "CAMPO MAIOR (BASE)", "CASTELO DO PIAU\u00cd (SUB BASE)", "COIVARAS", "JATOB\u00c1 DO PIAU\u00cd", "JUAZEIRO DO PIAU\u00cd", "N.S DO NAZAR\u00c9", "NOVO STO ANT\u00d4NIO", "PAU D' ARCO", "PRATA DO PI", "SIGEFREDO PACHECO", "S\u00c3O JO\u00c3O DA SERRA", "S\u00c3O MIGUEL DO TAPUIO"]}, {"base": "FLORIANO", "reg": "FLORIANO", "sup": "SUL", "dist": "EQTL PI", "cidades": ["AGUA BRANCA", "AMARANTE", "ANGICAL DO PIAUI", "BAIXA GRANDE DO RIBEIRO", "BARRO DURO", "CANAVIEIRA", "CAPITAO DE CAMPOS (BASE)", "CAXINGO", "FLORIANO", "FRANCISCO AYRES", "FRANCISCO SANTOS", "ITAUEIRA", "JOAO COSTA", "JOSE DE FREITAS", "LAGOA DO SITIO", "MADEIRO", "NAZARIA", "NOVA SANTA RITA", "PAJEU DO PIAUI", "RIO GRANDE DO PIAUI", "SAO FRANCISCO DE ASSIS DO PIAUI", "SAO GONCALO DO PIAUI", "SAO PEDRO DO PIAUI"]}, {"base": "OEIRAS", "reg": "OEIRAS", "sup": "SUL", "dist": "EQTL PI", "cidades": ["ANISIO DE ABREU", "ARRAIAL", "BELA VISTA DO PIAUI", "BETANIA DO PIAUI", "BOA HORA", "CAJAZEIRAS DO PIAUI", "CAJUEIRO DA PRAIA", "CAMPO ALEGRE DO FIDALGO", "CAMPO GRANDE DO PIAUI", "CAPITAO GERVASIO OLIVEIRA", "COLONIA DO PIAUI", "DIRCEU ARCOVERDE", "FRANCINOPOLIS", "FRANCISCO MACEDO", "GUARIBAS", "ISAIAS COELHO", "JUREMA", "LAGOA DO BARRO DO PIAUI", "MARCOLANDIA", "NOVO ORIENTE DO PIAUI", "OEIRAS", "PADRE MARCOS", "PATOS DO PIAUI", "PAULISTANA", "SANTA CRUZ DO PIAUI", "SANTA ROSA DO PIAUI", "SANTANA DO PIAUI", "SAO FRANCISCO DE ASSIS DO PIAUI", "SAO JOAO DA VARJOTA", "SIMOES", "WALL FERRAZ"]}, {"base": "PARNA\u00cdBA", "reg": "COSTA LESTE", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["BOM PRINCIPIO DO PIAU\u00cd", "BURITI DOS LOPES", "CAXING\u00d3", "CHARNEQUEIRA", "COCAL", "COCAL DOS ALVES", "ILHA GRANDE", "LUZILANDIA", "MURICI DOS PORTELAS", "PARNA\u00cdBA", "SOCORRO DO PIAU\u00cd"]}, {"base": "PICOS", "reg": "PICOS", "sup": "SUL", "dist": "EQTL PI", "cidades": ["ABREU LIMA", "ACAUA", "ALEGRETE DO PIAUI", "ALIPIO DE SOUZA", "AROAZES", "ARRAIAL", "BOCAINA", "CALDEIRAO GRANDE DO PIAUI", "CAMPO GRANDE DO PIAUI", "CARAUBAS DO PIAUI", "CONCEICAO DO CANINDE", "CURRAL NOVO DO PIAUI", "DOM EXPEDITO LOPES", "FLORESTA DO PIAUI", "FRANCISCO SANTOS", "GEMINIANO", "IPIRANGA DO PIAUI", "JAICOS", "JOAQUIM PIRES", "JOSE DE FREITAS", "LAGOA DO SITIO", "MASSAPE DO PIAUI", "MONSENHOR HIPOLITO", "OCARA", "PADRE MARCOS", "PATOS DO PIAUI", "PAU D'ARCO DO PIAUI", "PICOS", "PIO IX", "SANTANA DO PIAUI", "SANTO ANTONIO DE LISBOA", "SAO GONCALO DO PIAUI", "SAO JOAO DA CANABRAVA", "SAO JOAO DA VARJOTA", "SAO JOSE DO PIAUI", "SAO LUIS DO PIAUI", "SIGEFREDO PACHECO", "SIMPLICIO MENDES", "SUSSUAPARA", "VALENCA DO PIAUI", "WALL FERRAZ"]}, {"base": "PIRIPIRI", "reg": "PIRIPIRI", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["BARRAS", "BATALHA", "BREJO DO PIAUI", "CABECEIRAS DO PIAUI", "CAPITAO DE CAMPOS", "CAXINGO", "LAGOA DE SAO FRANCISCO", "MILTON BRANDAO", "PEDRO II", "PIRACURUCA", "PIRIPIRI", "SAO JOAO DO ARRAIAL", "SIGEFREDO PACHECO"]}, {"base": "S\u00c3O PEDRO", "reg": "TERES\u00cdNA", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["AGRICOLANDIA", "AGUA BRANCA", "ARRAIAL", "BARRO DURO", "CAJUEIRO DA PRAIA", "COCAL DE TELHA", "CURRALINHOS", "DEMERVAL LOBAO", "ELESBAO VELOSO", "HUGO NAPOLEAO", "INHUMA", "LAGOINHA DO PIAUI", "MIGUEL LEAO", "OLHO D'AGUA DO PIAUI", "PASSAGEM FRANCA DO PIAUI", "PAU D'ARCO DO PIAUI", "SAO FELIX DO PIAUI", "SAO MIGUEL DA BAIXA GRANDE", "SAO MIGUEL DO FIDALGO", "SIGEFREDO PACHECO", "VALENCA DO PIAUI"]}, {"base": "S\u00c3O RAIMUNDO NONATO", "reg": "OEIRAS", "sup": "SUL", "dist": "EQTL PI", "cidades": ["ALVORADA DO GURGUEIA", "ANISIO DE ABREU", "BETANIA DO PIAUI", "BONFIM DO PIAUI", "CANTO DO BURITI", "COLONIA DO PIAUI", "COMBINADO", "COMPRIDA (SUB BASE)", "COROMANDEL DO PIAUI", "CURIMATA", "DIRCEU ARCOVERDE", "DOM INOCENCIO", "FARTURA DO PIAUI", "GUARIBAS", "JULIO BORGES", "JUREMA", "MARCOS PARENTE", "PAJEU DO PIAUI", "SAO BRAZ DO PIAUI", "SAO JOAO DO PIAUI", "SAO JOSE DO PEIXE", "SAO LOURENCO DO PIAUI", "SAO RAIMUNDO NONATO", "TAMBORIL DO PIAUI", "VARZEA BRANCA"]}, {"base": "TERESINA", "reg": "TERES\u00cdNA", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["TERESINA"]}, {"base": "UNI\u00c3O", "reg": "COSTA LESTE", "sup": "NORTE", "dist": "EQTL PI", "cidades": ["BARRO DURO", "BEIRA (SUB BASE)", "COIVARAS", "LAGOA ALEGRE", "LAGOA DE SAO FRANCISCO", "MIGUEL ALVES", "NOSSA SENHORA DOS REMEDIOS", "PIMENTEIRAS", "UNI\u00c3O"]}];
+
+  const CITY_TO_BASE = {};
+  const ALL_CITIES = [];
+  BASES_DATA.forEach(b => {
+    b.cidades.forEach(c => {
+      CITY_TO_BASE[c] = b.base;
+      ALL_CITIES.push(c);
+    });
+  });
+  ALL_CITIES.sort((a,b)=>a.localeCompare(b,'pt-BR'));
+
+  const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function buildMonthOptions(){
+    const now = new Date();
+    const opts = [];
+    for(let i=1;i>=-13;i--){
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+      const label = MONTHS_PT[d.getMonth()]+' / '+d.getFullYear();
+      opts.push({key,label});
+    }
+    return opts.reverse();
+  }
+  const MONTH_OPTIONS = buildMonthOptions();
+
+  const state = {
+    step: 1,
+    fornecedor: '',
+    mesKey: '',
+    citySearch: '',
+    selectedCities: new Set(),
+    baseValues: {},
+    nomeContato: '',
+    emailContato: '',
+    telContato: '',
+    submitting: false,
+    submittedAt: null,
+    generatedIdEnvio: ''
+  };
+
+  const root = document.getElementById('apwRoot');
+
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function toast(msg){
+    let t = document.querySelector('.apw-toast');
+    if(!t){ t = document.createElement('div'); t.className='apw-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  function involvedBases(){
+    const set = new Set();
+    state.selectedCities.forEach(c => set.add(CITY_TO_BASE[c]));
+    return BASES_DATA.filter(b => set.has(b.base));
+  }
+
+  function render(){
+    let html = '';
+    html += renderHeader();
+    if(state.step <= 5){
+      const pct = (state.step/5)*100;
+      const labels = {
+        1:'Dados do fornecedor',
+        2:'Cidades atuadas no mês',
+        3:'Efetivo e HHT por base',
+        4:'Revisão dos dados',
+        5:'Contato do responsável'
+      };
+      html += `<div class="apw-progress-label">Etapa ${state.step} de 5 — ${labels[state.step]}</div>
+        <div class="apw-progress-track"><div class="apw-progress-fill" style="width:${pct}%"></div></div>`;
+    }
+    if(state.step === 1) html += renderStep1();
+    else if(state.step === 2) html += renderStep2();
+    else if(state.step === 3) html += renderStep3();
+    else if(state.step === 4) html += renderStep4();
+    else if(state.step === 5) html += renderStep5();
+    root.innerHTML = `<div class="apw-shell">${html}</div>`;
+    attachHandlers();
+  }
+
+  function renderHeader(){
+    return `<div class="apw-topline">
+        <div class="apw-brand">Apontamento mensal · EQTL PI</div>
+      </div>
+      <div class="apw-header">
+        <h1>Efetivo e HHT por base</h1>
+        <p>Selecione as cidades onde sua equipe atuou no mês. O sistema identifica sozinho a qual base cada cidade pertence.</p>
+      </div>`;
+  }
+
+  function renderStep1(){
+    const monthOpts = MONTH_OPTIONS.map(m => `<option value="${m.key}" ${m.key===state.mesKey?'selected':''}>${m.label}</option>`).join('');
+    return `<div class="apw-card">
+      <div class="apw-field">
+        <label class="apw-label">Empresa / Fornecedor</label>
+        <input class="apw-input" id="fldFornecedor" type="text" placeholder="Nome da empresa" value="${esc(state.fornecedor)}">
+      </div>
+      <div class="apw-field">
+        <label class="apw-label">Mês de referência</label>
+        <select class="apw-select" id="fldMes">
+          <option value="">Selecione o mês</option>
+          ${monthOpts}
+        </select>
+      </div>
+      <div id="step1Error" class="apw-error" style="display:none;"></div>
+    </div>
+    <div class="apw-actions">
+      <button class="apw-btn apw-btn-primary" id="btnNext1" type="button">Continuar</button>
+    </div>`;
+  }
+
+  function renderStep2(){
+    const filtered = state.citySearch.trim()
+      ? ALL_CITIES.filter(c => c.toLowerCase().includes(state.citySearch.trim().toLowerCase()))
+      : ALL_CITIES;
+    const rows = filtered.length ? filtered.map(c => {
+      const checked = state.selectedCities.has(c);
+      const id = 'city_'+c.replace(/[^a-zA-Z0-9]/g,'_');
+      return `<div class="apw-city-row" data-city="${esc(c)}">
+        <input type="checkbox" id="${id}" ${checked?'checked':''}>
+        <label for="${id}">${esc(c)}</label>
+      </div>`;
+    }).join('') : `<div class="apw-city-empty">Nenhuma cidade encontrada para "${esc(state.citySearch)}"</div>`;
+
+    return `<div class="apw-card">
+      <div class="apw-search">
+        <input type="text" id="fldSearch" placeholder="Buscar cidade..." value="${esc(state.citySearch)}">
+      </div>
+      <div class="apw-city-count">${state.selectedCities.size} cidade(s) selecionada(s)</div>
+      <div class="apw-city-list" id="cityList">${rows}</div>
+      <div id="step2Error" class="apw-error" style="display:none;"></div>
+    </div>
+    <div class="apw-actions">
+      <button class="apw-btn apw-btn-ghost" id="btnBack2" type="button">Voltar</button>
+      <button class="apw-btn apw-btn-primary" id="btnNext2" type="button">Continuar</button>
+    </div>`;
+  }
+
+  function renderStep3(){
+    const bases = involvedBases();
+    const cards = bases.map(b => {
+      const citiesInBase = b.cidades.filter(c => state.selectedCities.has(c));
+      const vals = state.baseValues[b.base] || {efetivo:'', hht:''};
+      return `<div class="apw-base-card">
+        <div class="apw-base-meta">${esc(b.dist)} · SUP. ${esc(b.sup)} · REG. ${esc(b.reg)}</div>
+        <p class="apw-base-name">Base: ${esc(b.base)}</p>
+        <div class="apw-base-cities"><strong>Cidades apontadas:</strong> ${citiesInBase.map(esc).join(', ')}</div>
+        <div class="apw-base-grid">
+          <div class="apw-field">
+            <label class="apw-label">Efetivo</label>
+            <input class="apw-input base-input" type="number" min="0" step="1" data-base="${esc(b.base)}" data-field="efetivo" value="${vals.efetivo}">
+          </div>
+          <div class="apw-field">
+            <label class="apw-label">HHT</label>
+            <input class="apw-input base-input" type="number" min="0" step="0.01" data-base="${esc(b.base)}" data-field="hht" value="${vals.hht}">
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return `${cards}
+    <div id="step3Error" class="apw-error" style="display:none;"></div>
+    <div class="apw-actions">
+      <button class="apw-btn apw-btn-ghost" id="btnBack3" type="button">Voltar</button>
+      <button class="apw-btn apw-btn-primary" id="btnNext3" type="button">Continuar</button>
+    </div>`;
+  }
+
+  function renderStep4(){
+    const bases = involvedBases();
+    const monthLabel = (MONTH_OPTIONS.find(m=>m.key===state.mesKey)||{}).label || state.mesKey;
+
+    let totalEfetivo = 0;
+    let totalHHT = 0;
+
+    bases.forEach(b => {
+      const v = state.baseValues[b.base] || {efetivo:'0', hht:'0'};
+      totalEfetivo += Number(v.efetivo || 0);
+      totalHHT += Number(v.hht || 0);
+    });
+
+    const baseCards = bases.map(b => {
+      const citiesInBase = b.cidades.filter(c => state.selectedCities.has(c));
+      const v = state.baseValues[b.base] || {efetivo:'0', hht:'0'};
+      return `<div class="apw-rev-group">
+        <div class="apw-rev-header">
+          <span class="apw-rev-title">BASE: ${esc(b.base)}</span>
+          <span class="apw-rev-badges">Efetivo: ${esc(v.efetivo)} | HHT: ${esc(v.hht)}</span>
+        </div>
+        <div class="apw-rev-cities">
+          <span>Cidades da base:</span> ${citiesInBase.map(esc).join(', ')}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="apw-card">
+      <div class="apw-summary-row"><span class="apw-summary-k">Fornecedor</span><span class="apw-summary-v">${esc(state.fornecedor)}</span></div>
+      <div class="apw-summary-row"><span class="apw-summary-k">Mês de Referência</span><span class="apw-summary-v">${esc(monthLabel)}</span></div>
+      <div class="apw-summary-row"><span class="apw-summary-k">Total de Cidades Atuadas</span><span class="apw-summary-v">${state.selectedCities.size}</span></div>
+      <div class="apw-summary-row" style="background:#F0F4F8; padding: 10px; border-radius:6px; margin-top:8px;">
+        <span class="apw-summary-k" style="color:var(--navy-dark); font-weight:700;">TOTAL GERAL</span>
+        <span class="apw-summary-v" style="color:var(--navy-dark); font-weight:700;">Efetivo: ${totalEfetivo} | HHT: ${totalHHT}</span>
+      </div>
+    </div>
+    
+    <div style="margin: 20px 0 10px; font-weight:700; font-size:15px; color:var(--navy-dark);">
+      Conferência por Base
+    </div>
+
+    ${baseCards}
+
+    <div class="apw-actions">
+      <button class="apw-btn apw-btn-ghost" id="btnBack4" type="button">Voltar</button>
+      <button class="apw-btn apw-btn-primary" id="btnNext4" type="button">Avançar para Responsável</button>
+    </div>`;
+  }
+
+  function renderStep5(){
+    return `<div class="apw-card">
+      <div style="font-weight:700; font-size:16px; color:var(--navy-dark); margin-bottom:6px;">
+        Dados do Responsável pelo Envio
+      </div>
+      <p style="font-size:13.5px; color:var(--ink-soft); margin-top:0; margin-bottom:18px;">
+        Informe seus dados de contato para a validação final e envio das respostas.
+      </p>
+      <div class="apw-field">
+        <label class="apw-label">Nome Completo</label>
+        <input class="apw-input" id="fldNomeContato" type="text" placeholder="Seu nome completo" value="${esc(state.nomeContato)}">
+      </div>
+      <div class="apw-base-grid">
+        <div class="apw-field">
+          <label class="apw-label">E-mail</label>
+          <input class="apw-input" id="fldEmailContato" type="email" placeholder="email@empresa.com" value="${esc(state.emailContato)}">
+        </div>
+        <div class="apw-field">
+          <label class="apw-label">Telefone / WhatsApp</label>
+          <input class="apw-input" id="fldTelContato" type="tel" placeholder="(86) 99999-9999" value="${esc(state.telContato)}">
+        </div>
+      </div>
+      <div id="step5Error" class="apw-error" style="display:none;"></div>
+    </div>
+
+    <div class="apw-actions">
+      <button class="apw-btn apw-btn-ghost" id="btnBack5" type="button" ${state.submitting?'disabled':''}>Voltar</button>
+      <button class="apw-btn apw-btn-primary" id="btnSubmit" type="button" ${state.submitting?'disabled':''}>${state.submitting?'Enviando...':'Finalizar e Enviar'}</button>
+    </div>`;
+  }
+
+  function renderDone(){
+    const monthLabel = (MONTH_OPTIONS.find(m=>m.key===state.mesKey)||{}).label || state.mesKey;
+    const bases = involvedBases();
+    let totalEfetivo = 0, totalHHT = 0;
+
+    bases.forEach(b => {
+      const v = state.baseValues[b.base] || {efetivo:'0', hht:'0'};
+      totalEfetivo += Number(v.efetivo || 0);
+      totalHHT += Number(v.hht || 0);
+    });
+
+    const rowsBases = bases.map(b => {
+      const citiesInBase = b.cidades.filter(c => state.selectedCities.has(c));
+      const v = state.baseValues[b.base] || {efetivo:'0', hht:'0'};
+      return `<tr style="border-bottom:1px solid #ddd;">
+        <td style="padding:8px;"><strong>${esc(b.base)}</strong><br><small>${esc(b.dist)} | ${esc(b.sup)} | ${esc(b.reg)}</small></td>
+        <td style="padding:8px; text-align:center;">${esc(v.efetivo)}</td>
+        <td style="padding:8px; text-align:center;">${esc(v.hht)}</td>
+        <td style="padding:8px;">${citiesInBase.map(esc).join(', ')}</td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="apw-shell">
+      <div class="apw-card apw-done">
+        <div class="apw-done-icon">✓</div>
+        <h2>Apontamento Registrado com Sucesso!</h2>
+        <p>Abaixo está o seu comprovante oficial de envio.</p>
+
+        <div id="printArea" style="text-align:left; border:1px solid #ccc; padding:20px; border-radius:8px; background:#fff; margin-bottom:20px;">
+          <div style="border-bottom:2px solid var(--navy); padding-bottom:10px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 style="margin:0; color:var(--navy-dark);">COMPROVANTE DE APONTAMENTO</h3>
+              <small style="color:#666;">Equatorial Energia · EQTL PI</small>
+            </div>
+            <div style="text-align:right; font-size:12px; color:#555;">
+              <strong>Data/Hora:</strong> ${esc(state.submittedAt || '')}<br>
+              <strong>ID Envio:</strong> ${esc(state.generatedIdEnvio || '')}
+            </div>
+          </div>
+
+          <table style="width:100%; font-size:13px; margin-bottom:15px; border-collapse:collapse;">
+            <tr><td style="padding:4px 0;"><strong>Empresa / Fornecedor:</strong> ${esc(state.fornecedor)}</td><td style="padding:4px 0;"><strong>Mês Ref:</strong> ${esc(monthLabel)}</td></tr>
+            <tr><td style="padding:4px 0;"><strong>Responsável:</strong> ${esc(state.nomeContato)}</td><td style="padding:4px 0;"><strong>Contato:</strong> ${esc(state.emailContato)} ${state.telContato ? '| '+esc(state.telContato) : ''}</td></tr>
+          </table>
+
+          <table style="width:100%; font-size:13px; border-collapse:collapse; margin-top:10px;" border="1" borderColor="#ddd">
+            <thead>
+              <tr style="background:#f2f2f2; text-align:left;">
+                <th style="padding:8px;">Base</th>
+                <th style="padding:8px; text-align:center;">Efetivo</th>
+                <th style="padding:8px; text-align:center;">HHT</th>
+                <th style="padding:8px;">Cidades Atuadas</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsBases}
+            </tbody>
+            <tfoot>
+              <tr style="background:#f9f9f9; font-weight:bold;">
+                <td style="padding:8px;">TOTAL GERAL</td>
+                <td style="padding:8px; text-align:center;">${totalEfetivo}</td>
+                <td style="padding:8px; text-align:center;">${totalHHT}</td>
+                <td style="padding:8px;">${state.selectedCities.size} cidade(s) total</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="apw-actions">
+          <button class="apw-btn apw-btn-ghost" onclick="window.print()" type="button">🖨️ Imprimir / Salvar PDF</button>
+          <button class="apw-btn apw-btn-primary" id="btnAnother" type="button">Novo Apontamento</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function attachHandlers(){
+    const q = sel => root.querySelector(sel);
+
+    if(state.step===1){
+      q('#fldFornecedor').oninput = e => state.fornecedor = e.target.value;
+      q('#fldMes').onchange = e => state.mesKey = e.target.value;
+      q('#btnNext1').onclick = () => {
+        if(!state.fornecedor.trim() || !state.mesKey){
+          const err = q('#step1Error');
+          err.style.display='block';
+          err.textContent = 'Preencha o nome do fornecedor e o mês de referência.';
+          return;
+        }
+        state.step = 2; render();
+      };
+    } else if(state.step===2){
+      q('#fldSearch').oninput = e => { state.citySearch = e.target.value; render(); document.getElementById('fldSearch').focus(); document.getElementById('fldSearch').selectionStart = document.getElementById('fldSearch').value.length; };
+      root.querySelectorAll('.apw-city-row').forEach(row => {
+        row.onclick = () => {
+          const city = row.getAttribute('data-city');
+          if(state.selectedCities.has(city)) state.selectedCities.delete(city);
+          else state.selectedCities.add(city);
+          render();
+        };
+      });
+      q('#btnBack2').onclick = () => { state.step=1; render(); };
+      q('#btnNext2').onclick = () => {
+        if(state.selectedCities.size===0){
+          const err = q('#step2Error');
+          err.style.display='block';
+          err.textContent = 'Selecione ao menos uma cidade.';
+          return;
+        }
+        state.step = 3; render();
+      };
+    } else if(state.step===3){
+      root.querySelectorAll('.base-input').forEach(inp => {
+        inp.oninput = () => {
+          const base = inp.getAttribute('data-base');
+          if(!state.baseValues[base]) state.baseValues[base] = {efetivo:'',hht:''};
+          state.baseValues[base][inp.getAttribute('data-field')] = inp.value;
+        };
+      });
+      q('#btnBack3').onclick = () => { state.step=2; render(); };
+      q('#btnNext3').onclick = () => {
+        const bases = involvedBases();
+        for(const b of bases){
+          const v = state.baseValues[b.base];
+          if(!v || v.efetivo===''||v.efetivo===undefined || v.hht===''||v.hht===undefined){
+            const err = q('#step3Error');
+            err.style.display='block';
+            err.textContent = 'Preencha Efetivo e HHT para todas as bases listadas.';
+            return;
+          }
+        }
+        state.step = 4; render();
+      };
+    } else if(state.step===4){
+      q('#btnBack4').onclick = () => { state.step=3; render(); };
+      q('#btnNext4').onclick = () => { state.step=5; render(); };
+    } else if(state.step===5){
+      q('#fldNomeContato').oninput = e => state.nomeContato = e.target.value;
+      q('#fldEmailContato').oninput = e => state.emailContato = e.target.value;
+      q('#fldTelContato').oninput = e => state.telContato = e.target.value;
+      q('#btnBack5').onclick = () => { state.step=4; render(); };
+      q('#btnSubmit').onclick = submitForm;
+    }
+  }
+
+  async function submitForm(){
+    if(!state.nomeContato.trim() || !state.emailContato.trim()){
+      const err = document.querySelector('#step5Error');
+      if(err){
+        err.style.display='block';
+        err.textContent = 'Informe o nome e e-mail do responsável pelo envio.';
+      }
+      return;
+    }
+
+    state.submitting = true; 
+    render();
+    
+    try {
+      const monthLabel = (MONTH_OPTIONS.find(m=>m.key===state.mesKey)||{}).label || state.mesKey;
+      const bases = involvedBases();
+      
+      const idEnvio = "ENV-" + Date.now();
+      const dataEnvio = new Date().toLocaleString('pt-BR');
+
+      state.generatedIdEnvio = idEnvio;
+      state.submittedAt = dataEnvio;
+
+      const requests = bases.map(b => {
+        const citiesInBase = b.cidades.filter(c => state.selectedCities.has(c));
+        const vals = state.baseValues[b.base] || {efetivo:'0', hht:'0'};
+
+        const payload = {
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `Apontamento - ${state.fornecedor.trim()} - Base ${b.base}`,
+          from_name: "Sistema EQTL",
+          ID_Envio: idEnvio,
+          Data_Envio: dataEnvio,
+          Fornecedor: state.fornecedor.trim(),
+          Responsavel_Envio: state.nomeContato.trim(),
+          Email_Contato: state.emailContato.trim(),
+          Telefone_Contato: state.telContato.trim(),
+          Mes_Referencia: monthLabel,
+          Distribuidora: b.dist || 'EQTL PI',
+          Superintendencia: b.sup || '',
+          Regional: b.reg || '',
+          Base: b.base,
+          Efetivo: vals.efetivo,
+          HHT: vals.hht,
+          Qtd_Cidades_Base: citiesInBase.length,
+          Cidades_Atuadas: citiesInBase.join(', ')
+        };
+
+        return fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+      });
+
+      await Promise.all(requests);
+
+      root.innerHTML = renderDone();
+      
+      document.getElementById('btnAnother').onclick = () => {
+        state.step = 1; 
+        state.fornecedor = ''; 
+        state.mesKey = ''; 
+        state.citySearch = '';
+        state.selectedCities = new Set(); 
+        state.baseValues = {}; 
+        state.nomeContato = '';
+        state.emailContato = '';
+        state.telContato = '';
+        state.submitting = false;
+        render();
+      };
+
+    } catch(err) {
+      state.submitting = false;
+      render();
+      toast('Erro ao enviar. Tente novamente.');
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
